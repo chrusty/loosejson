@@ -7,9 +7,8 @@ The "Unmarshal" method takes the same params as "json.Unmarshal()" (a []byte and
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	loosejson ""
+	loosejson "github.com/chrusty/loosejson"
 )
 
 const (
