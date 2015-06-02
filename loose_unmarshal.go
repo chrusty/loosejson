@@ -7,7 +7,15 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"unicode"
 )
+
+// Convert a string into camel-case (first-letter lowercase):
+func camelCase(stringToConvert string) string {
+	runes := []rune(stringToConvert)
+	runes[0] = unicode.ToLower(runes[0])
+	return (string(runes))
+}
 
 // Unmarshal into a struct with permissive type-conversion:
 func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
@@ -39,10 +47,21 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 
 		// Split up the JSON tags:
 		jsonTags := strings.Split(fieldType.Tag.Get("json"), ",")
+
+		// Ignore struct fields if the JSON name-tag is "-":
 		if jsonTags[0] != "-" {
 
 			// Get the JSON field-name (from the tags):
 			jsonFieldName := strings.Split(fieldType.Tag.Get("json"), ",")[0]
+
+			// Attempt to get the feld-interface (by name) out of the map [1: tags, 2: struct, 3: camelcase(struct)]:
+			var jsonInterface interface{}
+			for _, fieldName := range []string{jsonFieldName, fieldType.Name, camelCase(fieldType.Name)} {
+				jsonInterface = mapOfInterfaces[fieldName]
+				if jsonInterface != nil {
+					break
+				}
+			}
 
 			// Behave differently according to which type the field is:
 			switch fieldType.Type.String() {
@@ -50,21 +69,21 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 			// This struct-field is an int:
 			case "int", "int32", "int64", "*int", "*int32", "*int64":
 				var jsonValue int64 = 0
-				switch mapOfInterfaces[jsonFieldName].(type) {
+				switch jsonInterface.(type) {
 				case string:
 					// Convert a string to an int:
-					jsonValue, err = strconv.ParseInt(mapOfInterfaces[jsonFieldName].(string), 0, 64)
+					jsonValue, err = strconv.ParseInt(jsonInterface.(string), 0, 64)
 				case float32, float64:
 					// Convert a float to an int:
-					jsonValue = int64(mapOfInterfaces[jsonFieldName].(float64))
+					jsonValue = int64(jsonInterface.(float64))
 				case bool:
 					// Convert a bool to an int:
-					if mapOfInterfaces[jsonFieldName].(bool) {
+					if jsonInterface.(bool) {
 						jsonValue = 1
 					}
 				}
 				if err != nil {
-					return errors.New(fmt.Sprintf("Can't convert '%v' to int!", mapOfInterfaces[jsonFieldName]))
+					return errors.New(fmt.Sprintf("Can't convert '%v' to int!", jsonInterface))
 				} else {
 					// See if we're dealing with a pointer:
 					if fieldType.Type.Kind() == reflect.Ptr {
@@ -80,21 +99,21 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 			// This struct-field is a float:
 			case "float32", "float64", "*float32", "*float64":
 				var jsonValue float64 = 0.0
-				switch mapOfInterfaces[jsonFieldName].(type) {
+				switch jsonInterface.(type) {
 				case string:
 					// Convert a string to a float:
-					jsonValue, err = strconv.ParseFloat(mapOfInterfaces[jsonFieldName].(string), 64)
+					jsonValue, err = strconv.ParseFloat(jsonInterface.(string), 64)
 				case float32, float64:
 					// Just take a float:
-					jsonValue = mapOfInterfaces[jsonFieldName].(float64)
+					jsonValue = jsonInterface.(float64)
 				case bool:
 					// Convert a bool to a float:
-					if mapOfInterfaces[jsonFieldName].(bool) {
+					if jsonInterface.(bool) {
 						jsonValue = 1.0
 					}
 				}
 				if err != nil {
-					return errors.New(fmt.Sprintf("Can't convert '%v' to float!", mapOfInterfaces[jsonFieldName]))
+					return errors.New(fmt.Sprintf("Can't convert '%v' to float!", jsonInterface))
 				} else {
 					// See if we're dealing with a pointer:
 					if fieldType.Type.Kind() == reflect.Ptr {
@@ -110,19 +129,19 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 			// This struct-field is a string:
 			case "string", "*string":
 				var jsonValue string
-				switch mapOfInterfaces[jsonFieldName].(type) {
+				switch jsonInterface.(type) {
 				case string:
 					// Just take a string:
-					jsonValue = mapOfInterfaces[jsonFieldName].(string)
+					jsonValue = jsonInterface.(string)
 				case float32, float64:
 					// Convert a float to a string:
-					jsonValue = strconv.FormatFloat(mapOfInterfaces[jsonFieldName].(float64), 'f', -1, 64)
+					jsonValue = strconv.FormatFloat(jsonInterface.(float64), 'f', -1, 64)
 				case bool:
 					// Convert a bool to a string:
-					jsonValue = strconv.FormatBool(mapOfInterfaces[jsonFieldName].(bool))
+					jsonValue = strconv.FormatBool(jsonInterface.(bool))
 				}
 				if err != nil {
-					return errors.New(fmt.Sprintf("Can't convert '%v' to string!", mapOfInterfaces[jsonFieldName]))
+					return errors.New(fmt.Sprintf("Can't convert '%v' to string!", jsonInterface))
 				} else {
 					// See if we're dealing with a pointer:
 					if fieldType.Type.Kind() == reflect.Ptr {
@@ -138,21 +157,21 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 			// This struct-field is a bool:
 			case "bool", "*bool":
 				var jsonValue bool = false
-				switch mapOfInterfaces[jsonFieldName].(type) {
+				switch jsonInterface.(type) {
 				case string:
 					// Convert a string to a bool:
-					jsonValue, err = strconv.ParseBool(mapOfInterfaces[jsonFieldName].(string))
+					jsonValue, err = strconv.ParseBool(jsonInterface.(string))
 				case float32, float64:
 					// Convert a float to a bool:
-					if mapOfInterfaces[jsonFieldName].(float64) > 0.5 {
+					if jsonInterface.(float64) > 0.5 {
 						jsonValue = true
 					}
 				case bool:
 					// Just take a bool:
-					jsonValue = mapOfInterfaces[jsonFieldName].(bool)
+					jsonValue = jsonInterface.(bool)
 				}
 				if err != nil {
-					return errors.New(fmt.Sprintf("Can't convert '%v' to bool!", mapOfInterfaces[jsonFieldName]))
+					return errors.New(fmt.Sprintf("Can't convert '%v' to bool!", jsonInterface))
 				} else {
 					// See if we're dealing with a pointer:
 					if fieldType.Type.Kind() == reflect.Ptr {
