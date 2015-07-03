@@ -64,9 +64,9 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 			}
 
 			// If we've not been given a value for this field then we can just move on to the next:
-			if jsonInterface == nil {
-				continue
-			}
+			// if jsonInterface == nil {
+			// 	continue
+			// }
 
 			// Behave differently according to which type the field is:
 			switch fieldType.Type.String() {
@@ -77,7 +77,7 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 				switch jsonInterface.(type) {
 				case string:
 					// Continue with the next field if we were given an empty string:
-					if jsonInterface.(string) == "" {
+					if jsonInterface.(string) == "" || jsonInterface == nil {
 						jsonValue = 0
 					} else {
 						// Convert a string to an int:
@@ -112,7 +112,7 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 				switch jsonInterface.(type) {
 				case string:
 					// Continue with the next field if we were given an empty string:
-					if jsonInterface.(string) == "" {
+					if jsonInterface.(string) == "" || jsonInterface == nil {
 						jsonValue = 0.0
 					} else {
 						// Convert a string to a float:
@@ -175,7 +175,7 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 				switch jsonInterface.(type) {
 				case string:
 					// Continue with the next field if we were given an empty string:
-					if jsonInterface.(string) == "" {
+					if jsonInterface.(string) == "" || jsonInterface == nil {
 						jsonValue = false
 					} else {
 						// Convert a string to a bool:
