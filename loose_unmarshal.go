@@ -78,7 +78,7 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 				case string:
 					// Continue with the next field if we were given an empty string:
 					if jsonInterface.(string) == "" {
-						continue
+						jsonValue = 0
 					} else {
 						// Convert a string to an int:
 						jsonValue, err = strconv.ParseInt(jsonInterface.(string), 0, 64)
@@ -113,7 +113,7 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 				case string:
 					// Continue with the next field if we were given an empty string:
 					if jsonInterface.(string) == "" {
-						continue
+						jsonValue = 0.0
 					} else {
 						// Convert a string to a float:
 						jsonValue, err = strconv.ParseFloat(jsonInterface.(string), 64)
@@ -176,7 +176,7 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 				case string:
 					// Continue with the next field if we were given an empty string:
 					if jsonInterface.(string) == "" {
-						continue
+						jsonValue = false
 					} else {
 						// Convert a string to a bool:
 						jsonValue, err = strconv.ParseBool(jsonInterface.(string))
