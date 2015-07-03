@@ -76,8 +76,13 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 				var jsonValue int64 = 0
 				switch jsonInterface.(type) {
 				case string:
-					// Convert a string to an int:
-					jsonValue, err = strconv.ParseInt(jsonInterface.(string), 0, 64)
+					// Continue with the next field if we were given an empty string:
+					if jsonInterface.(string) == "" {
+						continue
+					} else {
+						// Convert a string to an int:
+						jsonValue, err = strconv.ParseInt(jsonInterface.(string), 0, 64)
+					}
 				case float32, float64:
 					// Convert a float to an int:
 					jsonValue = int64(jsonInterface.(float64))
@@ -106,8 +111,13 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 				var jsonValue float64 = 0.0
 				switch jsonInterface.(type) {
 				case string:
-					// Convert a string to a float:
-					jsonValue, err = strconv.ParseFloat(jsonInterface.(string), 64)
+					// Continue with the next field if we were given an empty string:
+					if jsonInterface.(string) == "" {
+						continue
+					} else {
+						// Convert a string to a float:
+						jsonValue, err = strconv.ParseFloat(jsonInterface.(string), 64)
+					}
 				case float32, float64:
 					// Just take a float:
 					jsonValue = jsonInterface.(float64)
@@ -164,8 +174,13 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 				var jsonValue bool = false
 				switch jsonInterface.(type) {
 				case string:
-					// Convert a string to a bool:
-					jsonValue, err = strconv.ParseBool(jsonInterface.(string))
+					// Continue with the next field if we were given an empty string:
+					if jsonInterface.(string) == "" {
+						continue
+					} else {
+						// Convert a string to a bool:
+						jsonValue, err = strconv.ParseBool(jsonInterface.(string))
+					}
 				case float32, float64:
 					// Convert a float to a bool:
 					if jsonInterface.(float64) > 0.5 {
