@@ -63,6 +63,11 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 				}
 			}
 
+			// If we've not been given a value for this field then we can just move on to the next:
+			if jsonInterface == nil {
+				continue
+			}
+
 			// Behave differently according to which type the field is:
 			switch fieldType.Type.String() {
 
@@ -83,7 +88,7 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 					}
 				}
 				if err != nil {
-					return errors.New(fmt.Sprintf("Can't convert '%v' to int!", jsonInterface))
+					return errors.New(fmt.Sprintf("Can't convert field '%s' (%v) to int!", fieldType.Name, jsonInterface))
 				} else {
 					// See if we're dealing with a pointer:
 					if fieldType.Type.Kind() == reflect.Ptr {
@@ -113,7 +118,7 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 					}
 				}
 				if err != nil {
-					return errors.New(fmt.Sprintf("Can't convert '%v' to float!", jsonInterface))
+					return errors.New(fmt.Sprintf("Can't convert '%v' (%v) to float!", fieldType.Name, jsonInterface))
 				} else {
 					// See if we're dealing with a pointer:
 					if fieldType.Type.Kind() == reflect.Ptr {
@@ -141,7 +146,7 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 					jsonValue = strconv.FormatBool(jsonInterface.(bool))
 				}
 				if err != nil {
-					return errors.New(fmt.Sprintf("Can't convert '%v' to string!", jsonInterface))
+					return errors.New(fmt.Sprintf("Can't convert '%v' (%v) to string!", fieldType.Name, jsonInterface))
 				} else {
 					// See if we're dealing with a pointer:
 					if fieldType.Type.Kind() == reflect.Ptr {
@@ -171,7 +176,7 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 					jsonValue = jsonInterface.(bool)
 				}
 				if err != nil {
-					return errors.New(fmt.Sprintf("Can't convert '%v' to bool!", jsonInterface))
+					return errors.New(fmt.Sprintf("Can't convert '%v' (%v) to bool!", fieldType.Name, jsonInterface))
 				} else {
 					// See if we're dealing with a pointer:
 					if fieldType.Type.Kind() == reflect.Ptr {
