@@ -20,6 +20,9 @@ func camelCase(stringToConvert string) string {
 // Unmarshal into a struct with permissive type-conversion:
 func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 
+	// Ignore empty fields?
+	omitEmptyFields := true
+
 	// Something safe to unmarshal the JSON into:
 	var mapOfInterfaces map[string]interface{}
 
@@ -64,9 +67,9 @@ func Unmarshal(jsonBytes []byte, structInterface interface{}) error {
 			}
 
 			// If we've not been given a value for this field then we can just move on to the next:
-			// if jsonInterface == nil {
-			// 	continue
-			// }
+			if jsonInterface == nil && omitEmptyFields {
+				continue
+			}
 
 			// Behave differently according to which type the field is:
 			switch fieldType.Type.String() {
